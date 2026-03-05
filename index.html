@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Javier Camero - Sistema Astral</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=Playfair+Display:ital,wght@0,900;1,900&family=Roboto+Mono:wght@700&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #020617;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .f-sans { font-family: 'Inter', sans-serif; }
+        .f-serif { font-family: 'Playfair Display', serif; }
+        .f-mono { font-family: 'Roboto Mono', monospace; }
+
+        .astro-word {
+            position: absolute;
+            pointer-events: none;
+            font-weight: 900;
+            z-index: 50;
+            text-align: center;
+            max-width: 85vw;
+            white-space: nowrap;
+            display: block !important;
+            transition: all 1.8s cubic-bezier(0.19, 1, 0.22, 1), opacity 1s ease;
+        }
+
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #space-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .eclipse-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            z-index: 10;
+        }
+
+        .eclipse-corona {
+            position: absolute;
+            inset: -20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.6) 0%, rgba(99, 102, 241, 0) 70%);
+            filter: blur(12px);
+            animation: pulse-corona 4s infinite alternate;
+        }
+
+        .eclipse-black {
+            position: absolute;
+            inset: 0;
+            background: #020617;
+            border-radius: 50%;
+            box-shadow: inset 0 0 15px rgba(99, 102, 241, 0.4), 0 0 25px rgba(99, 102, 241, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #angeles-name {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 20px;
+            letter-spacing: 4px;
+            color: white;
+            opacity: 0;
+            transition: opacity 2s ease, transform 2s ease;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(99, 102, 241, 1);
+            z-index: 11;
+            pointer-events: none;
+        }
+
+        @keyframes pulse-corona {
+            0% { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(1.4); opacity: 0.8; }
+        }
+
+        .instructions-pulse {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .spawn-in {
+            animation: spawn-pop 0.3s ease-out forwards;
+        }
+
+        @keyframes spawn-pop {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        #formation-btn {
+            position: absolute;
+            bottom: 120px;
+            z-index: 100;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            padding: 12px 24px;
+            border-radius: 20px;
+            color: #c7d2fe;
+            font-size: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: all 0.4s ease;
+        }
+
+        #formation-btn:hover {
+            background: rgba(99, 102, 241, 0.3);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+    </style>
+</head>
+<body class="f-sans text-white">
+
+    <canvas id="particle-canvas"></canvas>
+
+    <div id="app-container" class="relative w-full h-full flex flex-col items-center justify-between">
+        
+        <div id="header-hint" class="mt-12 z-20 pointer-events-none transition-opacity duration-1000">
+            <div class="bg-indigo-500/10 backdrop-blur-md px-6 py-3 rounded-full border border-indigo-400/30 shadow-[0_0_20px_rgba(99,102,241,0.2)] flex items-center gap-3 instructions-pulse">
+                <div class="w-2 h-2 bg-indigo-300 rounded-full animate-ping"></div>
+                <span class="text-indigo-100 text-[9px] font-bold tracking-[0.4em] uppercase">Toca el vacío para invocar</span>
+            </div>
+        </div>
+
+        <!-- Eclipse con el nombre oculto -->
+        <div class="eclipse-container">
+            <div class="eclipse-corona"></div>
+            <div class="eclipse-black">
+                <span id="angeles-name">ANGELES</span>
+            </div>
+        </div>
+
+        <button id="formation-btn" class="hidden">INICIAR RITUAL</button>
+
+        <svg id="space-canvas"></svg>
+        <div id="astros-layer" class="absolute inset-0"></div>
+
+        <div class="mb-10 flex flex-col items-center pointer-events-none z-20">
+            <div class="flex items-center gap-3 text-white">
+                <div class="h-[1px] w-12 bg-gradient-to-r from-transparent to-indigo-500"></div>
+                <span class="text-2xl font-black tracking-tighter bg-gradient-to-b from-white to-indigo-400 bg-clip-text text-transparent uppercase">Javier Camero</span>
+                <div class="h-[1px] w-12 bg-gradient-to-l from-transparent to-indigo-500"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const frasesJavier = [
+            "¡Eres lo mejor!", "Tú puedes", "No te dejes tumbar", "Sigue adelante", 
+            "No todo está perdido", "Vales demasiado", "Fuerza infinita", "Cree en ti", "Eres luz",
+            "Confía en ti", "Potencial infinito", "Un paso a la vez", "Éxito diario", "Hazlo con pasión",
+            "Sin miedo al fallo", "Tu sonrisa brilla", "Tu actitud lo es todo", "ATT: Javier Camero",
+            "La tormenta pasará", "No es inmadurez, es libertad"
+        ];
+
+        // Coordenadas para formar la "A"
+        const formationCoords = [
+            {x: 0, y: -180}, {x: -25, y: -130}, {x: -50, y: -80}, {x: -75, y: -30}, {x: -100, y: 20}, {x: -125, y: 70}, {x: -150, y: 120},
+            {x: 25, y: -130}, {x: 50, y: -80}, {x: 75, y: -30}, {x: 100, y: 20}, {x: 125, y: 70}, {x: 150, y: 120},
+            {x: -40, y: -30}, {x: -15, y: -30}, {x: 15, y: -30}, {x: 40, y: -30}
+        ];
+
+        const fuentes = ['f-sans', 'f-serif', 'f-mono'];
+        let astros = [];
+        let particles = [];
+        let centerX = window.innerWidth / 2;
+        let centerY = window.innerHeight / 2;
+        let interactionCount = 0;
+        let isSequenceRunning = false;
+
+        const pCanvas = document.getElementById('particle-canvas');
+        const pCtx = pCanvas.getContext('2d');
+        const formationBtn = document.getElementById('formation-btn');
+        const angelesText = document.getElementById('angeles-name');
+
+        function initParticles() {
+            pCanvas.width = window.innerWidth;
+            pCanvas.height = window.innerHeight;
+            particles = [];
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: Math.random() * pCanvas.width,
+                    y: Math.random() * pCanvas.height,
+                    size: Math.random() * 1.5,
+                    speedX: (Math.random() - 0.5) * 0.3,
+                    speedY: (Math.random() - 0.5) * 0.3,
+                    opacity: Math.random()
+                });
+            }
+        }
+
+        function drawParticles() {
+            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+            pCtx.fillStyle = '#a5b4fc';
+            particles.forEach(p => {
+                p.x += p.speedX; p.y += p.speedY;
+                if (p.x < 0) p.x = pCanvas.width;
+                if (p.x > pCanvas.width) p.x = 0;
+                if (p.y < 0) p.y = pCanvas.height;
+                if (p.y > pCanvas.height) p.y = 0;
+                pCtx.globalAlpha = p.opacity;
+                pCtx.beginPath();
+                pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                pCtx.fill();
+            });
+            requestAnimationFrame(drawParticles);
+        }
+
+        function spawnAstro(x, y) {
+            if (isSequenceRunning) return;
+            if (interactionCount === 0) document.getElementById('header-hint').style.opacity = '0';
+            
+            interactionCount++;
+            if (interactionCount >= 8) formationBtn.classList.remove('hidden');
+
+            const frase = frasesJavier[(interactionCount - 1) % frasesJavier.length];
+            const dx = x - centerX;
+            const dy = y - centerY;
+            const radius = Math.sqrt(dx*dx + dy*dy);
+            const angle = Math.atan2(dy, dx);
+
+            const astro = {
+                id: Math.random(),
+                text: frase,
+                radius: radius < 90 ? 140 : radius,
+                angle: angle,
+                speed: (0.0015 + Math.random() * 0.002) * (Math.random() > 0.5 ? 1 : -1),
+                color: `hsl(${220 + Math.random() * 40}, 80%, 85%)`,
+                pulse: Math.random() * Math.PI,
+                delay: 40,
+                fontClass: fuentes[Math.floor(Math.random() * fuentes.length)],
+                dom: null
+            };
+
+            astros.push(astro);
+            if (astros.length > 25) {
+                const old = astros.shift();
+                if (old.dom) old.dom.remove();
+            }
+            renderAstro(astro, x, y);
+        }
+
+        function renderAstro(astro, x, y) {
+            const div = document.createElement('div');
+            div.className = `astro-word spawn-in ${astro.fontClass}`;
+            div.innerText = astro.text;
+            div.style.left = `${x}px`;
+            div.style.top = `${y}px`;
+            div.style.color = astro.color;
+            div.style.fontSize = '12px';
+            div.style.textShadow = `0 0 10px ${astro.color}`;
+            document.getElementById('astros-layer').appendChild(div);
+            astro.dom = div;
+        }
+
+        function runAngelesSequence() {
+            isSequenceRunning = true;
+            formationBtn.style.opacity = '0';
+            setTimeout(() => formationBtn.classList.add('hidden'), 500);
+
+            // 1. Formar la A
+            astros.forEach((astro, index) => {
+                const target = formationCoords[index % formationCoords.length];
+                astro.dom.style.left = `${centerX + target.x}px`;
+                astro.dom.style.top = `${centerY + target.y}px`;
+                astro.dom.style.transform = 'translate(-50%, -50%) scale(1.1)';
+                astro.dom.style.fontSize = '11px';
+            });
+
+            // 2. Borrar poco a poco
+            setTimeout(() => {
+                astros.forEach((astro, index) => {
+                    setTimeout(() => {
+                        astro.dom.style.opacity = '0';
+                        astro.dom.style.transform = 'translate(-50%, -50%) scale(0.5)';
+                        // Limpiar memoria
+                        setTimeout(() => {
+                            if(astro.dom) astro.dom.remove();
+                        }, 1000);
+                    }, index * 200); // Borrado secuencial
+                });
+            }, 3000);
+
+            // 3. Revelar el nombre ANGELES
+            setTimeout(() => {
+                angelesText.style.opacity = '1';
+                angelesText.style.transform = 'scale(1.2)';
+                
+                // Efecto de explosión de partículas
+                particles.forEach(p => {
+                    p.speedX *= 5;
+                    p.speedY *= 5;
+                });
+            }, 3000 + (astros.length * 200) + 500);
+        }
+
+        function animate() {
+            const svgLayer = document.getElementById('space-canvas');
+            svgLayer.innerHTML = '';
+
+            astros.forEach((astro) => {
+                if (!isSequenceRunning) {
+                    if (astro.delay > 0) {
+                        astro.delay--;
+                    } else {
+                        astro.angle += astro.speed;
+                    }
+                    
+                    const posX = centerX + Math.cos(astro.angle) * astro.radius;
+                    const posY = centerY + Math.sin(astro.angle) * astro.radius;
+                    
+                    astro.dom.style.left = `${posX}px`;
+                    astro.dom.style.top = `${posY}px`;
+                    const scale = 1 + Math.sin(astro.pulse += 0.04) * 0.06;
+                    astro.dom.style.transform = `translate(-50%, -50%) scale(${scale})`;
+
+                    const orbit = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    orbit.setAttribute("cx", centerX); orbit.setAttribute("cy", centerY);
+                    orbit.setAttribute("r", astro.radius);
+                    orbit.setAttribute("fill", "none"); orbit.setAttribute("stroke", astro.color);
+                    orbit.setAttribute("stroke-width", "0.4"); orbit.setAttribute("stroke-opacity", "0.06");
+                    svgLayer.appendChild(orbit);
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('mousedown', handleInput);
+        window.addEventListener('touchstart', (e) => handleInput(e), { passive: true });
+        formationBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            runAngelesSequence();
+        });
+
+        function handleInput(e) {
+            const x = e.clientX || (e.touches && e.touches[0].clientX);
+            const y = e.clientY || (e.touches && e.touches[0].clientY);
+            if (x && y) spawnAstro(x, y);
+        }
+
+        window.addEventListener('resize', () => {
+            centerX = window.innerWidth / 2;
+            centerY = window.innerHeight / 2;
+            initParticles();
+        });
+
+        initParticles();
+        drawParticles();
+        animate();
+    </script>
+</body>
+</html>
