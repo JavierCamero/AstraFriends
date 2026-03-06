@@ -31,9 +31,36 @@
             text-align: center;
             white-space: nowrap;
             transition: all 1.8s cubic-bezier(0.19, 1, 0.22, 1), opacity 1s ease;
+            text-shadow: 0 0 10px currentColor;
         }
 
-        #particle-canvas, #constellation-canvas {
+        /* Estilo Star Wars mejorado para móvil */
+        .star-wars-crawl {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            width: 90%;
+            max-width: 500px;
+            transform: translateX(-50%) perspective(250px) rotateX(20deg);
+            text-align: center;
+            color: #fde047;
+            font-weight: 900;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            z-index: 300;
+            pointer-events: none;
+        }
+
+        .crawl-content {
+            animation: crawl 18s linear forwards;
+        }
+
+        @keyframes crawl {
+            0% { transform: translateY(100vh); opacity: 1; }
+            100% { transform: translateY(-180vh); opacity: 0; }
+        }
+
+        #particle-canvas, #constellation-canvas, #shooting-star-canvas {
             position: absolute;
             top: 0;
             left: 0;
@@ -42,7 +69,8 @@
         }
 
         #particle-canvas { z-index: 1; }
-        #constellation-canvas { z-index: 2; pointer-events: none; }
+        #shooting-star-canvas { z-index: 2; pointer-events: none; }
+        #constellation-canvas { z-index: 3; pointer-events: none; }
 
         .eclipse-container {
             position: absolute;
@@ -57,75 +85,91 @@
         .eclipse-black {
             position: absolute;
             inset: 0;
-            background: #020617;
+            background: radial-gradient(circle, #0f172a 0%, #020617 100%);
             border-radius: 50%;
-            box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.4), 0 0 30px rgba(99, 102, 241, 0.3);
+            box-shadow: 
+                inset 0 0 30px rgba(139, 92, 246, 0.5), 
+                0 0 50px rgba(139, 92, 246, 0.3),
+                0 0 100px rgba(99, 102, 241, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: visible;
         }
 
-        /* Contenedor de letras individuales */
+        /* Ajuste para que el nombre NO se amontone */
         #angeles-container {
             display: flex;
-            gap: 4px;
+            gap: 2px;
             opacity: 0;
             transition: opacity 2s ease;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: nowrap; /* Evita que se rompa en varias líneas */
         }
 
         .letter {
             display: inline-block;
             font-family: 'Playfair Display', serif;
             font-weight: 900;
-            font-size: 24px;
+            font-size: 20px; /* Tamaño reducido para evitar amontonamiento */
             color: white;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(99, 102, 241, 0.8);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(139, 92, 246, 0.6);
             transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @media (min-width: 640px) {
+            .letter { font-size: 28px; }
+            #angeles-container { gap: 6px; }
         }
 
         #formation-btn {
             position: absolute;
-            bottom: 120px;
+            bottom: 15%;
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.4);
+            background: linear-gradient(to bottom, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.4);
             padding: 12px 24px;
-            border-radius: 20px;
-            color: #c7d2fe;
-            font-size: 10px;
+            border-radius: 30px;
+            color: #ddd6fe;
+            font-size: 9px;
             letter-spacing: 4px;
             text-transform: uppercase;
             cursor: pointer;
-            backdrop-filter: blur(8px);
-            transition: all 0.4s ease;
+            backdrop-filter: blur(12px);
+            transition: all 0.5s ease;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+            width: 70%;
+            max-width: 250px;
         }
 
         #final-dialog {
             position: fixed;
             inset: 0;
-            background: rgba(2, 6, 23, 0.85);
-            backdrop-filter: blur(10px);
+            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 1));
+            backdrop-filter: blur(15px);
             z-index: 200;
             display: none;
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 1s ease;
+            transition: opacity 1.5s ease;
         }
 
         .dialog-content {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            padding: 2.5rem;
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 2rem 1.5rem;
             border-radius: 2rem;
             text-align: center;
-            max-width: 90vw;
+            width: 85%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .instructions-pulse { animation: pulse-glow 2s infinite; }
+        .instructions-pulse { animation: pulse-glow 2.5s infinite; }
         @keyframes pulse-glow {
             0%, 100% { opacity: 0.5; transform: scale(1); }
             50% { opacity: 1; transform: scale(1.05); }
@@ -135,18 +179,19 @@
 <body class="f-sans text-white">
 
     <canvas id="particle-canvas"></canvas>
+    <canvas id="shooting-star-canvas"></canvas>
     <canvas id="constellation-canvas"></canvas>
 
     <div id="app-container" class="relative w-full h-full flex flex-col items-center justify-between">
         
-        <div id="header-hint" class="mt-12 z-20 pointer-events-none transition-opacity duration-1000">
-            <div class="bg-indigo-500/10 backdrop-blur-md px-6 py-3 rounded-full border border-indigo-400/30 shadow-[0_0_20px_rgba(99,102,241,0.2)] flex items-center gap-3 instructions-pulse">
-                <div class="w-2 h-2 bg-indigo-300 rounded-full animate-ping"></div>
-                <span class="text-indigo-100 text-[9px] font-bold tracking-[0.4em] uppercase">Toca el vacío para invocar</span>
+        <div id="header-hint" class="mt-16 z-20 pointer-events-none transition-opacity duration-1000">
+            <div class="bg-violet-500/10 backdrop-blur-md px-6 py-3 rounded-full border border-violet-400/30 flex items-center gap-3 instructions-pulse">
+                <div class="w-2 h-2 bg-violet-400 rounded-full animate-ping"></div>
+                <span class="text-violet-100 text-[9px] font-bold tracking-[0.4em] uppercase">Toca el vacío</span>
             </div>
         </div>
 
-        <div class="eclipse-container">
+        <div class="eclipse-container" id="eclipse-ui">
             <div class="eclipse-black">
                 <div id="angeles-container">
                     <span class="letter">A</span>
@@ -160,45 +205,63 @@
             </div>
         </div>
 
-        <button id="formation-btn" class="hidden">INICIAR RITUAL</button>
+        <button id="formation-btn" class="hidden">RITUAL ASTRAL</button>
 
         <div id="astros-layer" class="absolute inset-0"></div>
 
-        <div class="mb-10 flex flex-col items-center pointer-events-none z-20">
-            <div class="flex items-center gap-3 text-white">
-                <div class="h-[1px] w-12 bg-gradient-to-r from-transparent to-indigo-500"></div>
-                <span class="text-2xl font-black tracking-tighter bg-gradient-to-b from-white to-indigo-400 bg-clip-text text-transparent uppercase">Javier Camero</span>
-                <div class="h-[1px] w-12 bg-gradient-to-l from-transparent to-indigo-500"></div>
-            </div>
+        <div class="mb-12 flex flex-col items-center pointer-events-none z-20">
+            <span class="text-xl font-black tracking-widest bg-gradient-to-b from-white to-violet-400 bg-clip-text text-transparent uppercase">Javier Camero</span>
         </div>
     </div>
 
     <div id="final-dialog">
         <div class="dialog-content">
-            <h2 id="dialog-text" class="text-xl font-bold tracking-widest text-indigo-100 mb-8 uppercase">¿Te gustó?</h2>
-            <div id="dialog-actions" class="flex gap-4 justify-center">
-                <button onclick="answer(true)" class="px-8 py-2 bg-indigo-600/20 border border-indigo-400/40 rounded-full hover:bg-indigo-500/40 transition-all uppercase text-xs tracking-widest">Sí</button>
+            <h2 id="dialog-text" class="text-lg font-black tracking-widest text-indigo-400 mb-8 uppercase leading-tight">¿Te ha gustado el viaje?</h2>
+            <div id="dialog-actions" class="flex flex-col gap-4 justify-center">
+                <button onclick="answer(true)" class="px-6 py-3 bg-violet-600/30 border border-violet-400/40 rounded-full active:bg-violet-500/50 transition-all uppercase text-[9px] font-bold tracking-[0.2em]">Sí, fue mágico</button>
+                <button onclick="answer(false)" id="btn-no" class="px-6 py-3 bg-red-600/10 border border-red-400/20 rounded-full active:bg-red-500/20 transition-all uppercase text-[9px] font-bold tracking-[0.2em] text-red-300">No</button>
             </div>
         </div>
     </div>
 
+    <div id="star-wars-container" class="hidden star-wars-crawl">
+        <div class="crawl-content space-y-8" id="crawl-text"></div>
+    </div>
+
     <script>
-        const frasesJavier = [
-            "¡Eres lo mejor!", "Tú puedes", "No te dejes tumbar", "Sigue adelante", 
-            "No todo está perdido", "Vales demasiado", "Fuerza infinita", "Cree en ti", "Eres luz",
-            "Confía en ti", "Potencial infinito", "Un paso a la vez", "Éxito diario", "Hazlo con pasión",
-            "Sin miedo al fallo", "Tu sonrisa brilla", "Tu actitud lo es todo", "ATT: Javier Camero",
-            "La tormenta pasará", "No es inmadurez, es libertad"
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const songPattern = [
+            { f: 523.25, d: 0.2 }, { f: 587.33, d: 0.2 }, { f: 659.25, d: 0.4 },
+            { f: 523.25, d: 0.2 }, { f: 587.33, d: 0.2 }, { f: 659.25, d: 0.4 },
+            { f: 783.99, d: 0.2 }, { f: 659.25, d: 0.2 }, { f: 587.33, d: 0.6 }
         ];
 
-        const formationCoords = [
-            {x: 0, y: -160}, {x: -20, y: -120}, {x: -40, y: -80}, {x: -60, y: -40}, {x: -80, y: 0}, 
-            {x: 20, y: -120}, {x: 40, y: -80}, {x: 60, y: -40}, {x: 80, y: 0},
-            {x: -30, y: -40}, {x: 0, y: -40}, {x: 30, y: -40}
+        let noteIndex = 0;
+        function playBell() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const note = songPattern[noteIndex % songPattern.length];
+            noteIndex++;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine'; 
+            osc.frequency.setValueAtTime(note.f, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 1.5);
+        }
+
+        const frasesJavier = [
+            "¡Eres lo mejor!", "Tú puedes", "Sigue adelante", "No todo está perdido", 
+            "Vales demasiado", "Fuerza infinita", "Cree en ti", "Eres luz pura",
+            "Un paso a la vez", "Éxito diario", "Sin miedo al fallo", "Tu sonrisa brilla", 
+            "ATT: Javier Camero", "La tormenta pasará", "Brilla siempre"
         ];
 
         let astros = [];
         let particles = [];
+        let shootingStars = [];
         let constellationStars = [];
         let centerX = window.innerWidth / 2;
         let centerY = window.innerHeight / 2;
@@ -207,30 +270,34 @@
 
         const pCanvas = document.getElementById('particle-canvas');
         const pCtx = pCanvas.getContext('2d');
+        const sCanvas = document.getElementById('shooting-star-canvas');
+        const sCtx = sCanvas.getContext('2d');
         const cCanvas = document.getElementById('constellation-canvas');
         const cCtx = cCanvas.getContext('2d');
         const formationBtn = document.getElementById('formation-btn');
         const angelesContainer = document.getElementById('angeles-container');
         const letters = document.querySelectorAll('.letter');
 
-        function initParticles() {
-            pCanvas.width = window.innerWidth;
-            pCanvas.height = window.innerHeight;
-            cCanvas.width = window.innerWidth;
-            cCanvas.height = window.innerHeight;
-            particles = Array.from({length: 100}, () => ({
+        function initCanvases() {
+            [pCanvas, sCanvas, cCanvas].forEach(c => {
+                c.width = window.innerWidth;
+                c.height = window.innerHeight;
+            });
+            centerX = window.innerWidth / 2;
+            centerY = window.innerHeight / 2;
+            particles = Array.from({length: 80}, () => ({
                 x: Math.random() * pCanvas.width,
                 y: Math.random() * pCanvas.height,
                 size: Math.random() * 1.2,
-                speedX: (Math.random() - 0.5) * 0.2,
-                speedY: (Math.random() - 0.5) * 0.2,
+                speedX: (Math.random() - 0.5) * 0.1,
+                speedY: (Math.random() - 0.5) * 0.1,
                 opacity: Math.random()
             }));
         }
 
         function drawParticles() {
             pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-            pCtx.fillStyle = '#a5b4fc';
+            pCtx.fillStyle = '#c7d2fe';
             particles.forEach(p => {
                 p.x += p.speedX; p.y += p.speedY;
                 if (p.x < 0) p.x = pCanvas.width;
@@ -243,170 +310,167 @@
             requestAnimationFrame(drawParticles);
         }
 
-        function drawConstellation() {
-            cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
-            if (constellationStars.length === 0) return;
-
-            cCtx.strokeStyle = 'rgba(165, 180, 252, 0.2)';
-            cCtx.lineWidth = 1;
-            cCtx.beginPath();
-            constellationStars.forEach((s, i) => {
-                if (i === 0) cCtx.moveTo(s.x, s.y);
-                else cCtx.lineTo(s.x, s.y);
-                
-                // Brillo de estrella
-                cCtx.fillStyle = 'white';
-                cCtx.shadowBlur = 10;
-                cCtx.shadowColor = 'white';
-                cCtx.fillRect(s.x-1, s.y-1, 3, 3);
-                cCtx.shadowBlur = 0;
+        function drawShootingStars() {
+            sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
+            if (Math.random() > 0.985 && shootingStars.length < 2) {
+                shootingStars.push({ x: Math.random() * sCanvas.width, y: 0, len: 50, speed: 8, opacity: 1 });
+            }
+            shootingStars.forEach((s, i) => {
+                s.x += s.speed; s.y += s.speed * 0.6; s.opacity -= 0.02;
+                if (s.opacity <= 0) { shootingStars.splice(i, 1); return; }
+                sCtx.strokeStyle = `rgba(255, 255, 255, ${s.opacity})`;
+                sCtx.beginPath(); sCtx.moveTo(s.x, s.y); sCtx.lineTo(s.x - s.len, s.y - s.len * 0.6); sCtx.stroke();
             });
-            cCtx.stroke();
-            requestAnimationFrame(drawConstellation);
+            requestAnimationFrame(drawShootingStars);
         }
 
         function spawnAstro(x, y) {
             if (isSequenceRunning) return;
+            playBell();
             if (interactionCount === 0) document.getElementById('header-hint').style.opacity = '0';
             interactionCount++;
-            if (interactionCount >= 6) formationBtn.classList.remove('hidden');
+            if (interactionCount >= 5) {
+                formationBtn.classList.remove('hidden');
+                formationBtn.style.opacity = '1';
+            }
 
             const astro = {
                 text: frasesJavier[interactionCount % frasesJavier.length],
-                radius: Math.max(120, Math.hypot(x - centerX, y - centerY)),
+                radius: Math.max(80, Math.hypot(x - centerX, y - centerY)),
                 angle: Math.atan2(y - centerY, x - centerX),
-                speed: (0.001 + Math.random() * 0.002) * (Math.random() > 0.5 ? 1 : -1),
-                color: `hsl(${220 + Math.random() * 40}, 80%, 85%)`,
+                speed: (0.0007 + Math.random() * 0.001) * (Math.random() > 0.5 ? 1 : -1),
+                color: `hsl(${250 + Math.random() * 50}, 80%, 90%)`,
                 dom: null
             };
             astros.push(astro);
-            
             const div = document.createElement('div');
-            div.className = 'astro-word';
+            div.className = 'astro-word f-sans';
             div.innerText = astro.text;
             div.style.color = astro.color;
-            div.style.fontSize = '12px';
+            div.style.fontSize = '10px';
             document.getElementById('astros-layer').appendChild(div);
             astro.dom = div;
         }
 
         function runSequence() {
             isSequenceRunning = true;
-            formationBtn.style.opacity = '0';
-            
-            // 1. Agrupar frases en forma de A
-            astros.forEach((a, i) => {
-                const target = formationCoords[i % formationCoords.length];
-                a.dom.style.left = `${centerX + target.x}px`;
-                a.dom.style.top = `${centerY + target.y}px`;
-                a.dom.style.opacity = '0.4';
-            });
-
-            // 2. Desvanecer frases y mostrar ANGELES
-            setTimeout(() => {
-                astros.forEach(a => a.dom.style.opacity = '0');
-                angelesContainer.style.opacity = '1';
-                
-                // Escalar letras
-                letters.forEach((l, i) => {
-                    setTimeout(() => {
-                        l.style.transform = 'scale(2.5)';
-                        l.style.margin = '0 15px';
-                    }, i * 100);
-                });
-
-                // 3. El Salto y conversión a constelación
+            formationBtn.style.display = 'none';
+            astros.forEach(a => a.dom.style.opacity = '0');
+            angelesContainer.style.opacity = '1';
+            letters.forEach((l, i) => {
                 setTimeout(() => {
-                    constellationStars = [];
-                    letters.forEach((l, i) => {
-                        const rect = l.getBoundingClientRect();
-                        const startX = rect.left + rect.width/2;
-                        const startY = rect.top + rect.height/2;
+                    l.style.transform = 'scale(1.5)';
+                    playBell();
+                }, i * 180);
+            });
+            setTimeout(() => {
+                constellationStars = [];
+                letters.forEach((l, i) => {
+                    const rect = l.getBoundingClientRect();
+                    constellationStars.push({x: rect.left + rect.width/2, y: rect.top + rect.height/2, tx: Math.random() * window.innerWidth, ty: Math.random() * window.innerHeight});
+                    l.style.transition = 'all 2.5s ease';
+                    l.style.opacity = '0';
+                });
+                animateConstellation();
+                setTimeout(() => {
+                    const dialog = document.getElementById('final-dialog');
+                    dialog.style.display = 'flex';
+                    setTimeout(() => dialog.style.opacity = '1', 100);
+                }, 2500);
+            }, 3000);
+        }
 
-                        // Posición de constelación aleatoria
-                        const targetX = Math.random() * (window.innerWidth * 0.6) + (window.innerWidth * 0.2);
-                        const targetY = Math.random() * (window.innerHeight * 0.4) + (window.innerHeight * 0.2);
-                        
-                        const star = { x: startX, y: startY };
-                        constellationStars.push(star);
-
-                        // Animación de salto
-                        l.style.transition = 'all 2s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
-                        l.style.position = 'fixed';
-                        l.style.left = `${startX}px`;
-                        l.style.top = `${startY}px`;
-                        
-                        setTimeout(() => {
-                            l.style.left = `${targetX}px`;
-                            l.style.top = `${targetY}px`;
-                            l.style.transform = 'scale(0.1)';
-                            l.style.opacity = '0';
-                            
-                            // Sincronizar punto de constelación
-                            let progress = 0;
-                            const moveStar = () => {
-                                progress += 0.01;
-                                star.x = startX + (targetX - startX) * progress;
-                                star.y = startY + (targetY - startY) * progress;
-                                if (progress < 1) requestAnimationFrame(moveStar);
-                            };
-                            moveStar();
-                        }, 100);
-                    });
-                    drawConstellation();
-
-                    // 4. Mostrar diálogo final
-                    setTimeout(() => {
-                        const dialog = document.getElementById('final-dialog');
-                        dialog.style.display = 'flex';
-                        setTimeout(() => dialog.style.opacity = '1', 100);
-                    }, 3500);
-
-                }, 3000);
-
-            }, 2000);
+        function animateConstellation() {
+            cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+            cCtx.strokeStyle = 'rgba(199, 210, 254, 0.2)';
+            cCtx.beginPath();
+            constellationStars.forEach((s, i) => {
+                s.x += (s.tx - s.x) * 0.04; s.y += (s.ty - s.y) * 0.04;
+                if (i === 0) cCtx.moveTo(s.x, s.y); else cCtx.lineTo(s.x, s.y);
+                cCtx.fillStyle = 'white';
+                cCtx.fillRect(s.x-1, s.y-1, 2, 2);
+            });
+            cCtx.stroke();
+            if(isSequenceRunning) requestAnimationFrame(animateConstellation);
         }
 
         function answer(isYes) {
+            const dialog = document.getElementById('final-dialog');
             const text = document.getElementById('dialog-text');
             const actions = document.getElementById('dialog-actions');
-            text.style.opacity = '0';
-            setTimeout(() => {
-                text.innerText = "Te Quiero. No dejes que nadie apague tu Brillo ✨";
-                text.style.fontSize = "16px";
+
+            if (isYes) {
+                text.innerText = "No dejes que nadie apague tu Brillo Eterno ✨.";
+                text.style.color = "white";
                 text.style.textTransform = "none";
-                text.style.opacity = '1';
+                text.style.fontSize = "15px";
                 actions.style.display = 'none';
-            }, 500);
+                for(let i=0; i<3; i++) setTimeout(playBell, i*300);
+            } else {
+                dialog.style.opacity = '0';
+                setTimeout(() => {
+                    dialog.style.display = 'none';
+                    startStarWarsEffect();
+                }, 800);
+            }
         }
 
-        function animate() {
+        function startStarWarsEffect() {
+            const container = document.getElementById('star-wars-container');
+            const content = document.getElementById('crawl-text');
+            container.classList.remove('hidden');
+            content.innerHTML = frasesJavier.map(f => `<div>${f}</div>`).join('');
+            
+            let bellInterval = setInterval(playBell, 900);
+
+            setTimeout(() => {
+                clearInterval(bellInterval);
+                container.classList.add('hidden');
+                
+                const dialog = document.getElementById('final-dialog');
+                const text = document.getElementById('dialog-text');
+                const actions = document.getElementById('dialog-actions');
+                
+                text.innerText = "¿Te arrepientes de decir no?";
+                text.style.color = "#f87171";
+                
+                actions.innerHTML = `
+                    <button onclick="location.reload()" class="px-6 py-3 bg-violet-600/30 border border-violet-400/40 rounded-full active:bg-violet-500/50 transition-all uppercase text-[9px] font-bold tracking-[0.2em]">Sí, volver</button>
+                    <button onclick="finalRejection()" class="px-6 py-3 bg-gray-800 border border-gray-600 rounded-full active:bg-gray-700 transition-all uppercase text-[9px] font-bold tracking-[0.2em]">No, estoy segura</button>
+                `;
+                
+                dialog.style.display = 'flex';
+                setTimeout(() => dialog.style.opacity = '1', 100);
+            }, 18000);
+        }
+
+        function finalRejection() {
+            document.getElementById('dialog-text').innerText = "El universo respeta tu elección, yo estaré en línea siempre cuando me necesites. ✨";
+            document.getElementById('dialog-text').style.color = "white";
+            document.getElementById('dialog-actions').style.display = 'none';
+        }
+
+        function animateAstros() {
             if (!isSequenceRunning) {
                 astros.forEach(a => {
                     a.angle += a.speed;
-                    const x = centerX + Math.cos(a.angle) * a.radius;
-                    const y = centerY + Math.sin(a.angle) * a.radius;
-                    a.dom.style.left = `${x}px`;
-                    a.dom.style.top = `${y}px`;
+                    a.dom.style.left = `${centerX + Math.cos(a.angle) * a.radius}px`;
+                    a.dom.style.top = `${centerY + Math.sin(a.angle) * a.radius}px`;
                     a.dom.style.transform = 'translate(-50%, -50%)';
                 });
             }
-            requestAnimationFrame(animate);
+            requestAnimationFrame(animateAstros);
         }
 
         window.addEventListener('mousedown', e => spawnAstro(e.clientX, e.clientY));
         window.addEventListener('touchstart', e => spawnAstro(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
         formationBtn.addEventListener('click', e => { e.stopPropagation(); runSequence(); });
-        
-        window.addEventListener('resize', () => {
-            centerX = window.innerWidth / 2;
-            centerY = window.innerHeight / 2;
-            initParticles();
-        });
+        window.addEventListener('resize', initCanvases);
 
-        initParticles();
+        initCanvases();
         drawParticles();
-        animate();
+        drawShootingStars();
+        animateAstros();
     </script>
 </body>
 </html>
